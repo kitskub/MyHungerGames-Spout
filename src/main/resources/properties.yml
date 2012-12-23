@@ -1,0 +1,15 @@
+name: MyHungerGames
+main: me.kitskub.myhungergames.HungerGames
+version: 0.9-dev
+authors: [kitskub]
+description: A plugin that provides functionality similar to and more than the HungerGames. Sponsored be treepuncher.com
+
+commands:
+    hga:
+        description: admin hungergames command
+        usage:
+    hg:
+        description: user hungergames command
+        usage:
+        
+permissions:          

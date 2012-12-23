@@ -1,0 +1,213 @@
+v0.9
+- Added about command
+- Allow console to do some commands
+- Added Multiverse-Adventure to resetter
+- Added teams
+- Spectators can no longer pick up items
+- Correctly reset chests
+- Fix countdown always starting at 0
+- Change Updater to new class
+- Properly remove adjacent chests
+- Compare worlds too when comparing Locations
+- Changed allowflight permission to be admin
+- Made events use API Game
+- Made metrics start in a Runnable to prevent startup lag
+- Moved some methods to a GeneralUtils class
+
+v0.8.1
+- Added death-messages - configurable of when displayed
+- Added disable-flight
+- Fixed maven groupId
+- Fix blacklisting chests
+
+v0.8
+- Fixed grouping separator error
+- Made subscribing per-game as well as global
+- Refactor of ChatUtils
+- Introduction of kits
+- Fix blacklisting chests
+
+v0.7
+- Bug fixes
+- Added some command shortcuts: "/hga creategame" instead of "/hga add game"
+- User commands can now use default game instead specifying one
+- Made admin commands that are not part of setting up able to use the default game
+- Fixed number stuff
+- Fixed remove-items
+- Fixed players not getting tped out of the game on /hga stop
+- Merged PlayerQuitEvent, PlayerLeaveEvent, and PlayerKickEvent into PlayerLeaveEvent with Type
+- Added joinsign, gamesign, and infowall
+- Chests can now always be interacted with
+- Changed grace-period so it only affects damage by other entities
+- Removed performance monitor as it is unneeded and didn't work
+- Made a Game interface and GameManager abstract class for the API
+- Added a chat perm
+- Added stop-targetting
+- Made deaths be cancelled instead of waiting for respawn
+- Added blacklisted chests - chest that don't get auto-added
+- New command system
+- Added a forceclear command
+- /hga reload is now a little bit smarter (I may do away with this as it might cause problems)
+- Now uses weakreferences to help prevent memory leaks
+- Added hide-players
+
+v0.6
+- bug fixes
+- Signs now save between restarts
+- Signs can now listen for any game by leaving third line blank
+- Added auto-join feature
+- Added death cannon
+- Removed Game_Load, Game_Create, and Game_Remove signs
+- Added sign creation perms in the form of admin.create.sign for all or admin.create.sign.<name> for individual
+- Added auto-join-allowed config option and permission
+- Removed reload-world as it was buggy and unneeded
+- Added max-game-time
+- Merge GameEndEvent and GameStopEvent
+- /hga kill actually kills the player now
+- Added /hg back
+- Added the option to use spawn or not
+- Added an optional weight to chests that help designate what items get put 1 is base for all non-weighted chests NOTE: breaks chest saves
+- Added a lang.yml with some messages
+- Web stats!
+- Potentially added the possibly for chests to reset
+- Added an optional grace period
+- Added GameState enum
+- Set enabled now stops the game if disabling
+- Loading a game stops it if it is running and the load says it's disabled
+- Added a PlayerState enum NOTE: GameState and PlayerState are intertwined in the logic, so if it is off it will cause many bugs
+- Added special commands
+- Added a clear-inv option
+- Stop all games on plugin disable
+- Added timeout option
+- Minimum items in each random chest
+- Added /hga profile to help find bottlenecks in code
+- Added take-life-on-leave
+- Added start-timer
+- Games can be started with 2 players again, but broadcasts a warning message.
+
+v0.5.2
+- Possibly fixed config issues
+- Added catch for /hga set fixedchest
+- Added hungergame.user.autosubscribe NOTE: this should not inherit from hungergame.user.* or hungergame.* if it does, it's a bug!
+- Fixed auto-vote
+
+v0.5.1
+- Bug fixes
+- Now uses Files instead of CustomYaml
+- Command package refactor
+- Fixed GameCountdown stuff
+- Fixed sign listening stuff
+
+v0.5
+- Code Cleanup
+- Many small fixes
+- Removed the unused LocationList
+- Changed the order that the inventory and other stuff is loaded on join and leave
+- Added a (hopefully) better /hg stat
+- Added null checks for spawnpoints
+- separation of some methods out of HungerGames
+- Added a getPerm() field to CommandUsage and changed name to Commands
+- Implemented resetter for HawkEye
+- Fixed changes by non-playing players that had left the game, but not quitted being added internally
+- Added a getPlayingSession()
+- Removed some double sending messages
+- Made InventorySave not use getArmorContents
+- Added /hg stop <game name>
+- Reorganization of stop, stopGame, start, startGame
+- added getType() to Commands
+- Improved Logging
+- Made players that quit who are not playing not drop their inventory
+- Spectators now just fly, and do not get creative
+- Removed unneeded equals in HungerGame
+- Changed "should-clear-inv" to "require-inv-clear"
+- Better death handling to save a little CPU
+- If a player uses /hg leave before the game starts, immediately redirects to /hg quit
+- When a game is resumed from a pause, only players that were playing get put back in.
+- When a game is auto-started, the last player to join does not receive the start messages
+- Fixed block break/place/interact
+- Added /hga add world <game> [world] and /hga add cuboid
+- Separated spectatorFlightAllowed from spectatorFlying
+- Made sponsoring a conversation rather than chat
+- Made spectators turn invisible
+- Spectators get God Mode
+- Spectators get removed when game is paused
+- Sponsors moved to HungerGame
+- Cleanup of SessionListener
+- Better resetting - made it use worlds and cuboids - NOTE LogBlock does not recognize cuboids
+- Better separation between commands and other methods
+- "force-internal" for resetting
+- "force-survival" config option
+- "freeze-player" config option
+- "force-damage" config option
+- Changes to playerLeaving and playerEntering (code)
+- Setups can now inherit from others
+- Now uses matchMaterial in Config
+- Itemsets can now inherit from others
+- config can now have have data
+- config options to limit the distance that players can hear each other
+- config option to allow players to receive minimal messages
+- config option to allow items to be deleted on the ground after a game ends
+- Fixed official name to "MyHungerGames" instead of "HungerGames"
+- Respawning players and spectators now can respawn at random locations that other players have been
+- Added a player option to /hg spectate to allow spectators to teleport to a specific player
+- Another possible fix for chest stuff
+- New command system
+- Sign listening
+- fixed item chests are in
+- added a generic data map to Session
+- number of items in a chest is now chosen by: numItems = Math.ceil((size * Math.sqrt(items.size()))/10)
+- Added creeper explosions to internal listener
+- Hardcode permissions
+- Fixed a string that may just be the cause for all the permissions stir 
+- BREAKING make sure permissions are in the form of hungergame.admin/user.* if using star
+- Moved itemsets to chestconfig.yml
+- Add use-match-material in chestconfig.yml to allow for custom blocks to be used
+- Added chest and sponsor loot by command
+- Fixed world and cuboid saving/loading
+- Added the ability for admins with "hungergame.stop" to be able to talk to players by typing "hg" in the beginning of the message
+- Renamed chestconfig.yml to itemconfig.yml
+- Switched around some methods in Config and ItemConfig
+- Added rewards
+- Added a config updater
+- Added the ability for spectators to sponsor a random sponsor-loot item for free at a certain interval
+- Spectators now get removed on stopGame()
+
+v0.4.3
+- Fixed nullpointerexception in getSpectating() for real this time
+
+v0.4.1
+- Fixed nullpointerexception in getspectating()
+
+v0.4
+- Might have fixed the games not saving
+- Fixed a nullpointerexception
+- Basic spectating
+- Changed most player keys to String keys
+- Might have fixed permissions. (again)
+- Added specific block change listener. Can be internal, LogBlock, or HawkEye (HawkEye is not currently implements) requests are open for more
+- Added a Restock command to restock all chests in a game
+
+v0.3.1
+- Logging stuff
+- register forgotten BlockListener
+- Can-teleport
+- use-command
+- Early world reseting in the form of full world
+- /hga add game <game name>' now instructs user to add spawnpoints after creating it.
+- Fixed players still being able to join even under conditions where they shouldn't be able to
+- Added option to allow chests to be automatically added and filled at first open
+
+v0.3
+- Clearing inventories is now optional
+- Fixed winner not being recognized
+- Add quit command.
+- Cleanup
+- Lives cleanup
+- Rejoin/Join/Leave cleaned up
+- Added Metrics
+- Use equalsIgnoreCase, not equals for commands
+- all-vote is in
+- block interact/place/break options
+- Added an unimplemented Logging class
+- Auto-vote
+- Made quitting before a game starts remove you from the games stats

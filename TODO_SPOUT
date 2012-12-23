@@ -1,0 +1,44 @@
+HIGH:
+- Tutorial
+- Make configs enum based
+- Make SessionListener use switch
+- Add back in sponsor
+- Add back in allowFlying
+- Add back in hidePlayers
+- Replace hasChild(String) with hasChild(String...) or hasNode(String...)
+- Add back in SearchCommand
+- Add back in SponsorCommand
+- Add back ActivityListener - move to component?
+- Add back in ChatListener
+- Add back in EntityTarget
+- Add back in pickup cancel
+- Add back in PlayerDeathListener
+- Add back in TeleportListener
+- Add back in Updater
+
+MEDIUM:
+- Random events
+- WebStats - finish
+- leaderboards
+- Deathmatch
+
+LOW:
+- economy config stuff
+- NPCs
+- /hg rules
+- Log command
+- Have lobby check for conflicting signs
+- Compass tracks players
+- Optionally remove [MyHungerGames]
+
+OPTIONAL:
+- Possible timed game events
+- Map gen
+- Possibly make resetting a deque type thing to make it a rollback (useful for pistons and such)
+- Add some /hga remove stuff
+
+UNCONFIRMED:
+- Minimize external resetting of changes from players who have left but not quitted
+- More lang messages
+- Enhance Spectating
+- Fix startTime
