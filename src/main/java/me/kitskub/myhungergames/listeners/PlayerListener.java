@@ -1,23 +1,23 @@
 package me.kitskub.myhungergames.listeners;
 
+import me.kitskub.myhungergames.Defaults;
 import me.kitskub.myhungergames.GameManager;
 import me.kitskub.myhungergames.HungerGames;
 import me.kitskub.myhungergames.games.HungerGame;
 import me.kitskub.myhungergames.games.PlayerQueueHandler;
 
-import org.spout.api.entity.Player;
 import org.spout.api.event.EventHandler;
 import org.spout.api.event.Listener;
 import org.spout.api.event.Order;
 import org.spout.api.event.player.PlayerJoinEvent;
 import org.spout.api.event.player.PlayerKickEvent;
 import org.spout.api.event.player.PlayerLeaveEvent;
-import org.spout.vanilla.event.player.PlayerDeathEvent;
+import org.spout.vanilla.event.player.PlayerToggleSneakingEvent;
 
 
 public class PlayerListener implements Listener {
 
-	/*//TODO add back in
+	/*//TODO add back in player death
 	@EventHandler(order = Order.LATEST)
 	public static void playerKilled(PlayerDeathEvent event) {
 		Player killed = event.getPlayer();
@@ -48,7 +48,7 @@ public class PlayerListener implements Listener {
 		HungerGames.playerLeftServer(event.getPlayer());
 	}
 	
-	/*@EventHandler//TODO add back in
+	/*@EventHandler//TODO add back in player move
 	public void playerMove(PlayerMoveEvent event) {
 		if (event.isCancelled()) return;
 		Player player = event.getPlayer();
@@ -71,15 +71,15 @@ public class PlayerListener implements Listener {
 		if (event.isCancelled()) return;
 		PlayerQueueHandler.addPlayer(event.getPlayer());
 	}
-	/*//TODO add back in
-	@EventHandler(priority = EventPriority.MONITOR)
-	public void playerSneak(PlayerToggleSneakEvent event) {
+	
+	@EventHandler(order = Order.MONITOR)
+	public void playerSneak(PlayerToggleSneakingEvent event) {
 		HungerGame game;
 		if ((game = GameManager.INSTANCE.getRawPlayingSession(event.getPlayer())) == null) return;
-		if (!Config.HIDE_PLAYERS.getBoolean(game.getSetup())) return;
+		if (!Defaults.Config.HIDE_PLAYERS.getBoolean(game.getSetup())) return;
 		event.setCancelled(true);
 	}
-	
+	/*//TODO add back in pickup item
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)	
 	public void onItemPickup(PlayerPickupItemEvent event) {
 		if (GameManager.INSTANCE.getSpectating(event.getPlayer()) != null) {

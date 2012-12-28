@@ -55,7 +55,7 @@ public class EntityListener implements Listener{
 			event.setCancelled(true);
 		}
 	}
-	/*//TODO add back in
+	/*//TODO add back in targetting
 	@EventHandler(order = Order.LATEST)
 	public void onEntityTargetEntity(EntityTargetEvent event) {
 		if (!(event.getEntity() instanceof Player)) return;

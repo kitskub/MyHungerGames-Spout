@@ -403,12 +403,12 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 		if (spectated != null) loc = spectated.getTransform().getTransform();
 		player.teleport(loc);
 		spectatorFlying.put(player.getName(), player.get(Human.class).isFlying());
-		//spectatorFlightAllowed.put(player.getName(), player.get(Human.class).getAllowFlight());//TODO add back in
-		//player.setAllowFlight(true);
+		spectatorFlightAllowed.put(player.getName(), player.get(Human.class).canFly());
+		player.get(Human.class).setCanFly(true);
 		player.get(Human.class).setFlying(true);
-		//for (Player p : getRemainingPlayers()) {//TODO add back in
-		//	p.hidePlayer(player);
-		//}
+		for (Player p : getRemainingPlayers()) {
+			p.setVisible(player, false);
+		}
 		ChatUtils.send(player, "You are now spectating %s", name);
 		return true;
 	}
@@ -425,11 +425,11 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 		}
 		spectatorSponsoringRunnable.removeSpectator(player);
 		player.get(Human.class).setFlying(spectatorFlying.get(player.getName()));
-		//player.setAllowFlight(spectatorFlightAllowed.get(player.getName()));//TODO add back in
+		player.get(Human.class).setCanFly(spectatorFlightAllowed.get(player.getName()));
 		player.teleport(spectators.remove(player.getName()));
-		//for (Player p : getRemainingPlayers()) {//TODO add back in
-		//	p.showPlayer(player);
-		//}
+		for (Player p : getRemainingPlayers()) {
+			p.setVisible(player, true);
+		}
 	}
 	
 	@Override
@@ -487,7 +487,7 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 			if (spectator == null) continue;
 			removeSpectator(spectator);
 		}
-		//spectatorSponsoringRunnable.cancel();//TODO add back in
+		//spectatorSponsoringRunnable.cancel();//TODO add back in sponsoring
 		Spout.getScheduler().cancelTask(locTask);
 		if (Config.REMOVE_ITEMS.getBoolean(setup)) removeItemsOnGround();
 		state = STOPPED;
@@ -552,7 +552,7 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 		initialStartTime = System.currentTimeMillis();
 		startTimes.add(System.currentTimeMillis());
 		locTask = Spout.getScheduler().scheduleSyncRepeatingTask(HungerGames.getInstance(), this, 20 * 120, 20 * 10, TaskPriority.NORMAL);
-		//spectatorSponsoringRunnable.setTask(Spout.getScheduler().scheduleSyncRepeatingTask(HungerGames.getInstance(), spectatorSponsoringRunnable, 0, SpectatorSponsoringRunnable.pollEveryInTicks, TaskPriority.NORMAL));//TODO add back in
+		//spectatorSponsoringRunnable.setTask(Spout.getScheduler().scheduleSyncRepeatingTask(HungerGames.getInstance(), spectatorSponsoringRunnable, 0, SpectatorSponsoringRunnable.pollEveryInTicks, TaskPriority.NORMAL));//TODO add back in sponsoring
 		ResetHandler.gameStarting(this);
 		releasePlayers();
 		fillInventories();
@@ -850,18 +850,18 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 	    }
 	    if (Config.DISABLE_FLY.getBoolean(setup)) {
 		    if (!HungerGames.hasPermission(player, Perm.ADMIN_ALLOW_FLIGHT)) {
-			    //if (player.getAllowFlight()) {//TODO add back in
-				//    playersCanFly.add(player.getName());
-				  //  player.setAllowFlight(false);
-			    //}
+			    if (player.get(Human.class).canFly()) {
+				playersCanFly.add(player.getName());
+				player.get(Human.class).setCanFly(false);
+			    }
 			    if (player.get(Human.class).isFlying()) {
 				    playersFlying.add(player.getName());
 				    player.get(Human.class).setFlying(false);
 			    }
 			    
-		    }
+		    }	
 	    }
-	    if (Config.HIDE_PLAYERS.getBoolean(setup)) player.get(Human.class).setSneaking(true);//TODO add back in
+	    if (Config.HIDE_PLAYERS.getBoolean(setup)) player.get(Human.class).setSneaking(true);
 	    if (Config.CLEAR_INV.getBoolean(setup)) InventorySave.saveAndClearInventory(player);
 	    for (String kit : ItemConfig.getKits()) {
 		    if (HungerGames.hasPermission(player, Perm.USER_KIT) || player.hasPermission(Perm.USER_KIT.get() + "." + kit)) {
@@ -871,7 +871,7 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 	    for (String string : spectators.keySet()) {
 		    Player spectator = Spout.getEngine().getPlayer(string, false);
 		    if (spectator == null) continue;
-		    //player.hidePlayer(spectator);//TODO add back in
+		    player.setVisible(spectator, false);
 	    }
 	    return true;
 	}
@@ -956,7 +956,7 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 		for (String string : spectators.keySet()) {
 		    Player spectator = Spout.getEngine().getPlayer(string, false);
 		    if (spectator == null) continue;
-		    //player.showPlayer(spectator);//TODO add back in
+		    player.setVisible(spectator, true);
 		}
 		GameManager.INSTANCE.unfreezePlayer(player);
 		InventorySave.loadInventory(player);
@@ -965,11 +965,11 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 		}
 		if (Config.DISABLE_FLY.getBoolean(setup)) {
 			if (!HungerGames.hasPermission(player, Perm.ADMIN_ALLOW_FLIGHT)) {
-				///player.setAllowFlight(playersCanFly.remove(player.getName()));//TODO add back in
+				player.get(Human.class).setCanFly(playersCanFly.remove(player.getName()));
 				player.get(Human.class).setFlying(playersFlying.remove(player.getName()));
 			}
 		}
-		if (Config.HIDE_PLAYERS.getBoolean(setup)) player.get(Human.class).setSneaking(false);//TODO add back in
+		if (Config.HIDE_PLAYERS.getBoolean(setup)) player.get(Human.class).setSneaking(false);
 		readyToPlay.remove(player.getName());
 		if (!temporary) {
 			spawnsTaken.remove(player.getName());

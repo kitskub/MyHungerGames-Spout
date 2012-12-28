@@ -89,7 +89,7 @@ public class HungerGames extends CommonPlugin {
 	}
 
 	private void callTasks() {
-		/*Spout.getScheduler().scheduleSyncRepeatingTask(this,//TODO add back in
+		/*Spout.getScheduler().scheduleSyncRepeatingTask(this,//TODO add back in updater
 			new Runnable() {
 			public void run() {
 				Updater updater = new Updater(HungerGames.getInstance(), "myhungergames", HungerGames.getInstance().getFile(), Updater.UpdateType.NO_DOWNLOAD, true);

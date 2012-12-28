@@ -20,7 +20,7 @@ import org.spout.vanilla.material.enchantment.Enchantments;
 public class ConfigUtils {
 	
 	public static ConfigurationNode getOrCreateSection(ConfigurationNodeSource section, String string) {
-		ConfigurationNode config = section.getNode(string);//TODO addChild(name)
+		ConfigurationNode config = section.addNode(string);
 		return config;
 	}
 	

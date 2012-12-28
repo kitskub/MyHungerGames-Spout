@@ -135,7 +135,7 @@ public class InternalResetter extends Resetter implements Listener, Runnable {
 		addToCheck(event.getBlock());
 	}
 
-	/*//TODO add back in?
+	/*//TODO add back in block changes?
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onBlockPlace(BlockPlaceEvent event) {
 		addToCheck(event.getBlock(), event.getBlock().getState());
@@ -191,7 +191,7 @@ public class InternalResetter extends Resetter implements Listener, Runnable {
 		addToCheck(event.getBlock(), event.getBlock().getState());
 	}
 	*/
-	/*//TODO add in
+	/*//TODO add in vehicles/creature resetting
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onVehicleDestroy(VehicleDestroyEvent event) {
 	}

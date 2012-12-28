@@ -16,7 +16,7 @@ import org.spout.api.event.player.PlayerChatEvent;
 
 
 public class ChatListener implements Listener {
-	/*//TODO add back in
+	/*//TODO add back in Chat
 	@EventHandler(order = Order.LATEST_IGNORE_CANCELLED)
 	public void playerChat(PlayerChatEvent event) {
 		HungerGame chatterGame = GameManager.INSTANCE.getRawSession(event.getPlayer());

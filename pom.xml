@@ -40,8 +40,8 @@
 		</dependency>
 		<dependency>
 			<groupId>org.spout</groupId>
-			<artifactId>Vanilla</artifactId>
-			<version>1.4.5-SNAPSHOT</version>
+			<artifactId>vanilla</artifactId>
+			<version>1.4.6-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>
