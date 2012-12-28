@@ -52,7 +52,6 @@ public class HungerGames extends CommonPlugin {
 
 	@Override
 	public void onDisable() {
-		throw new UnsupportedOperationException("Not supported yet.");
 	}
 	
 	public static void reload() {
