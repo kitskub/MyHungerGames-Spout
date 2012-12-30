@@ -18,7 +18,7 @@ import org.spout.api.event.Order;
 import org.spout.api.event.cause.PluginCause;
 import org.spout.api.geo.cuboid.Block;
 import org.spout.api.geo.discrete.Point;
-import org.spout.api.material.Material;
+import org.spout.api.material.BlockMaterial;
 import org.spout.api.scheduler.Task;
 import org.spout.api.scheduler.TaskPriority;
 import org.spout.api.util.config.ConfigurationNode;
@@ -106,11 +106,11 @@ public class SignListener implements Runnable, Listener {
 	
 	private class SignData {
 		private Point loc;
-		private Material type;
+		private BlockMaterial type;
 		private int data;
 		private String[] lines;
 
-		public SignData(Point loc, Material type, byte data, String[] lines) {
+		public SignData(Point loc, BlockMaterial type, byte data, String[] lines) {
 			this.loc = loc;
 			this.type = type;
 			this.data = data;

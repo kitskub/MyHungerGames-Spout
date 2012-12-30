@@ -6,6 +6,7 @@ import org.spout.api.command.Command;
 import org.spout.api.command.CommandContext;
 import org.spout.api.command.CommandSource;
 import org.spout.api.entity.Player;
+import org.spout.api.exception.CommandException;
 
 /**
  *
@@ -22,7 +23,7 @@ public abstract class PlayerCommand extends HGCommand {
 	}
 
 	@Override
-	public void handle(CommandSource source, Command command, CommandContext args) {
+	public void handle(CommandSource source, Command command, CommandContext args) throws CommandException {
 		if (!(source instanceof Player)) {
 			source.sendMessage("In-game use only.");
 			return;
@@ -30,5 +31,5 @@ public abstract class PlayerCommand extends HGCommand {
 		handlePlayer((Player) source, command, args);
 	}
 	
-	public abstract void handlePlayer(Player player, Command command, CommandContext args);
+	public abstract void handlePlayer(Player player, Command command, CommandContext args) throws CommandException;
 }

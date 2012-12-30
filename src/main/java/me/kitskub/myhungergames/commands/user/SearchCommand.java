@@ -21,7 +21,7 @@ public class SearchCommand extends HGCommand {
 
 	@Override
 	public void handle(final CommandSource source, final Command command, final CommandContext args) {
-		/*if (args.getRawArgs().isEmpty()) {//TODO add back in
+		/*if (args.getRawArgs().isEmpty()) {//TODO add back in search command
 			ChatUtils.error(cs, "Must have a player to search for!");
 			return;
 		}

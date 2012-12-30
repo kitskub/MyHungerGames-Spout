@@ -3,15 +3,14 @@ HIGH:
 - Make configs enum based
 - Make SessionListener use switch
 - Add back in sponsor
-- Add back in allowFlying
-- Add back in SearchCommand
-- Add back in SponsorCommand
+4- Add back in SearchCommand
 - Add back ActivityListener - move to component?
 - Add back in EntityTarget
 - Add back in pickup cancel
 - Add back in PlayerDeathListener
 - Add back in TeleportListener
 - Add back in Updater
+- Change to CommandExceptions
 
 MEDIUM:
 - Random events

@@ -22,7 +22,6 @@ public class QuitCommand extends PlayerCommand {
 			ChatUtils.error(player, "You are currently not in a game.");
 			return;
 		}
-
 		game.quit(player, true);
 	}
 }

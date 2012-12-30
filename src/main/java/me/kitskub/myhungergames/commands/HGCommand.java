@@ -54,7 +54,7 @@ public abstract class HGCommand extends SimpleCommand implements CommandExecutor
 		this.usage = usage;
 	}
 
-	public abstract void handle(CommandSource source, Command command, CommandContext args);
+	public abstract void handle(CommandSource source, Command command, CommandContext args) throws CommandException;
 
 	@Override
 	public void processCommand(CommandSource source, Command command, CommandContext args) throws CommandException {

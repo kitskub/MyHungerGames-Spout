@@ -487,7 +487,7 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 			if (spectator == null) continue;
 			removeSpectator(spectator);
 		}
-		//spectatorSponsoringRunnable.cancel();//TODO add back in sponsoring
+		spectatorSponsoringRunnable.cancel();
 		Spout.getScheduler().cancelTask(locTask);
 		if (Config.REMOVE_ITEMS.getBoolean(setup)) removeItemsOnGround();
 		state = STOPPED;
@@ -552,7 +552,7 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 		initialStartTime = System.currentTimeMillis();
 		startTimes.add(System.currentTimeMillis());
 		locTask = Spout.getScheduler().scheduleSyncRepeatingTask(HungerGames.getInstance(), this, 20 * 120, 20 * 10, TaskPriority.NORMAL);
-		//spectatorSponsoringRunnable.setTask(Spout.getScheduler().scheduleSyncRepeatingTask(HungerGames.getInstance(), spectatorSponsoringRunnable, 0, SpectatorSponsoringRunnable.pollEveryInTicks, TaskPriority.NORMAL));//TODO add back in sponsoring
+		spectatorSponsoringRunnable.setTask(Spout.getScheduler().scheduleSyncRepeatingTask(HungerGames.getInstance(), spectatorSponsoringRunnable, 0, SpectatorSponsoringRunnable.pollEveryInTicks, TaskPriority.NORMAL));
 		ResetHandler.gameStarting(this);
 		releasePlayers();
 		fillInventories();

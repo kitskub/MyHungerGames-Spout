@@ -12,7 +12,7 @@ public class TeleportListener implements Listener {
 	public static void allowTeleport(Player player) {
 		playerWhiteList.add(player.getName());
 	}
-	/*//TODO add back in
+	/*//TODO add back in teleport listener
 	@EventHandler()
 	public void onTeleport(PlayerTeleportEvent event) {
 		Player player = event.getPlayer();

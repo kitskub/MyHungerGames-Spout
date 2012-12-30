@@ -9,6 +9,7 @@ import me.kitskub.myhungergames.games.TimedGameRunnable;
 import me.kitskub.myhungergames.listeners.*;
 import me.kitskub.myhungergames.reset.ResetHandler;
 import me.kitskub.myhungergames.stats.TimeListener;
+import me.kitskub.myhungergames.utils.ChatUtils;
 
 import org.spout.api.Spout;
 import org.spout.api.chat.style.ChatStyle;
@@ -18,6 +19,7 @@ import org.spout.api.entity.Player;
 import org.spout.api.event.EventManager;
 import org.spout.api.exception.ConfigurationException;
 import org.spout.api.plugin.CommonPlugin;
+import org.spout.api.plugin.services.EconomyService;
 
 public class HungerGames extends CommonPlugin {
 	public static final String CMD_ADMIN = "hga", CMD_USER = "hg";
@@ -25,6 +27,7 @@ public class HungerGames extends CommonPlugin {
 	public static SimpleCommand ADMIN;
 	public static SimpleCommand USER;
 	public static final Random RANDOM = new Random();
+	private static EconomyService econ = EconomyService.getEconomy();
 
 	@Override
 	public void onEnable() {
@@ -129,5 +132,33 @@ public class HungerGames extends CommonPlugin {
 
 	public static void playerLeftServer(Player player) {
 		SessionListener.removePlayer(player);
+	}
+	
+		public static boolean isEconomyEnabled() {
+		return econ != null;
+	}
+
+	public static void withdraw(Player player, double amount) {
+		if (!isEconomyEnabled()) {
+			ChatUtils.error(player, "Economy use has been disabled.");
+			return;
+		}
+		econ.withdraw(player.getName(), amount);
+	}
+
+	public static void deposit(Player player, double amount) {
+		if (!isEconomyEnabled()) {
+			ChatUtils.error(player, "Economy use has been disabled.");
+			return;
+		}
+		econ.deposit(player.getName(), amount);
+	}
+
+	public static boolean hasEnough(Player player, double amount) {
+		if (!isEconomyEnabled()) {
+			ChatUtils.error(player, "Economy use has been disabled.");
+			return false;
+		}
+		return econ.has(player.getName(), amount);
 	}
 }

@@ -5,6 +5,7 @@ import me.kitskub.myhungergames.GameManager;
 import me.kitskub.myhungergames.HungerGames;
 import me.kitskub.myhungergames.games.HungerGame;
 import me.kitskub.myhungergames.games.PlayerQueueHandler;
+import org.spout.api.entity.Player;
 
 import org.spout.api.event.EventHandler;
 import org.spout.api.event.Listener;
@@ -12,29 +13,29 @@ import org.spout.api.event.Order;
 import org.spout.api.event.player.PlayerJoinEvent;
 import org.spout.api.event.player.PlayerKickEvent;
 import org.spout.api.event.player.PlayerLeaveEvent;
+import org.spout.vanilla.event.player.PlayerDeathEvent;
 import org.spout.vanilla.event.player.PlayerToggleSneakingEvent;
 
 
 public class PlayerListener implements Listener {
 
-	/*//TODO add back in player death
 	@EventHandler(order = Order.LATEST)
 	public static void playerKilled(PlayerDeathEvent event) {
 		Player killed = event.getPlayer();
 		HungerGame gameOfKilled = GameManager.INSTANCE.getRawPlayingSession(killed);
 		if (gameOfKilled == null) return;
-		Player killer = killed.getKiller();
-		if (killer != null) {
-			HungerGame gameOfKiller = GameManager.INSTANCE.getRawPlayingSession(killer);
-			if (gameOfKiller == null) return;
-			if (gameOfKilled.compareTo(gameOfKiller) == 0) {
-				gameOfKiller.killed(killer, killed, event);
-			}
-		}
-		else {
+		//Player killer = killed.getKiller();//TODO add back in game of killer
+		//if (killer != null) {
+		//	HungerGame gameOfKiller = GameManager.INSTANCE.getRawPlayingSession(killer);
+		//	if (gameOfKiller == null) return;
+		//	if (gameOfKilled.compareTo(gameOfKiller) == 0) {
+		//		gameOfKiller.killed(killer, killed, event);
+		//	}
+		//}
+		//else {
 			gameOfKilled.killed(null, killed, event);
-		}
-	}*/
+		//}
+	}
 
 	@EventHandler(order = Order.MONITOR)
 	public static void playerQuit(PlayerLeaveEvent event) {
