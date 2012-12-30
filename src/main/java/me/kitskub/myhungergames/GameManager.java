@@ -18,13 +18,13 @@ import org.spout.api.util.config.ConfigurationNode;
 public class GameManager extends me.kitskub.myhungergames.api.GameManager {
 	private static final HungerGames plugin = HungerGames.getInstance();
 	public static final GameManager INSTANCE = new GameManager();
-	private static Map<String, Map<EquatableWeakReference<HungerGame>, PlayerStat>> stats = new HashMap<String, Map<EquatableWeakReference<HungerGame>, PlayerStat>>();
+	private static Map<Player, Map<EquatableWeakReference<HungerGame>, PlayerStat>> stats = new HashMap<Player, Map<EquatableWeakReference<HungerGame>, PlayerStat>>();
 	private static final Set<HungerGame> games = new TreeSet<HungerGame>();
-	private static final Map<String, EquatableWeakReference<HungerGame>> spectators = new HashMap<String, EquatableWeakReference<HungerGame>>(); // <player, game>
-	private static final Map<String, Point> frozenPlayers = new HashMap<String, Point>();
-	private static final Set<String> globalSubscribedPlayers = new HashSet<String>();
-	private static final Map<EquatableWeakReference<HungerGame>, Set<String>> subscribedPlayers = new HashMap<EquatableWeakReference<HungerGame>, Set<String>>();
-	private static final Map<String, Point> playerBackPoints = new HashMap<String, Point>();
+	private static final Map<Player, EquatableWeakReference<HungerGame>> spectators = new HashMap<Player, EquatableWeakReference<HungerGame>>(); // <player, game>
+	private static final Map<Player, Point> frozenPlayers = new HashMap<Player, Point>();
+	private static final Set<Player> globalSubscribedPlayers = new HashSet<Player>();
+	private static final Map<EquatableWeakReference<HungerGame>, Set<Player>> subscribedPlayers = new HashMap<EquatableWeakReference<HungerGame>, Set<Player>>();
+	private static final Map<Player, Point> playerBackPoints = new HashMap<Player, Point>();
 	
 	@Override
 	public boolean createGame(String name) {
@@ -67,12 +67,12 @@ public class GameManager extends me.kitskub.myhungergames.api.GameManager {
 		
 	public PlayerStat createStat(HungerGame game, Player player) {
 		PlayerStat stat = new PlayerStat(game, player);
-		if (stats.get(player.getName()) == null) stats.put(player.getName(), new HashMap<EquatableWeakReference<HungerGame>, PlayerStat>());
-		stats.get(player.getName()).put(new EquatableWeakReference<HungerGame>(game), stat);
+		if (stats.get(player) == null) stats.put(player, new HashMap<EquatableWeakReference<HungerGame>, PlayerStat>());
+		stats.get(player).put(new EquatableWeakReference<HungerGame>(game), stat);
 		return stat;
 	}
 	
-	public void clearGamesForPlayer(String player, HungerGame game) {
+	public void clearGamesForPlayer(Player player, HungerGame game) {
 		stats.get(player).remove(new EquatableWeakReference<HungerGame>(game));
 	}
 
@@ -152,8 +152,8 @@ public class GameManager extends me.kitskub.myhungergames.api.GameManager {
 	}
 
 	public void playerLeftServer(Player player) {
-		if (spectators.containsKey(player.getName())) {
-			WeakReference<HungerGame> spectated = spectators.remove(player.getName());
+		if (spectators.containsKey(player)) {
+			WeakReference<HungerGame> spectated = spectators.remove(player);
 			if (spectated.get() == null || spectated == null) return;
 			spectated.get().removeSpectator(player);
 			return;
@@ -232,22 +232,22 @@ public class GameManager extends me.kitskub.myhungergames.api.GameManager {
 
 	@Override
 	public boolean addSpectator(Player player, Game game, Player spectated) {
-		if (spectators.containsKey(player.getName())) return false;
+		if (spectators.containsKey(player)) return false;
 		if (!((HungerGame) game).addSpectator(player, spectated)) return false;
-		spectators.put(player.getName(), new EquatableWeakReference<HungerGame>((HungerGame) game));
+		spectators.put(player, new EquatableWeakReference<HungerGame>((HungerGame) game));
 		return true;
 	}
 	
 	@Override
 	public EquatableWeakReference<HungerGame> getSpectating(Player player) {
 	    if (player == null) return null;    
-	    if (!spectators.containsKey(player.getName())) return null;
-	    return spectators.get(player.getName());
+	    if (!spectators.containsKey(player)) return null;
+	    return spectators.get(player);
 	}
 	
 	@Override
 	public boolean removeSpectator(Player player) {
-		WeakReference<HungerGame> game = spectators.remove(player.getName());
+		WeakReference<HungerGame> game = spectators.remove(player);
 		if (game != null && game.get() != null) {
 			game.get().removeSpectator(player);
 			return true;
@@ -257,25 +257,25 @@ public class GameManager extends me.kitskub.myhungergames.api.GameManager {
 	
 	@Override
 	public void freezePlayer(Player player) {
-		frozenPlayers.put(player.getName(), player.getTransform().getPosition());
+		frozenPlayers.put(player, player.getTransform().getPosition());
 	}
 
 	@Override
 	public void unfreezePlayer(Player player) {
-		frozenPlayers.remove(player.getName());
+		frozenPlayers.remove(player);
 	}
 
 	@Override
 	public boolean isPlayerFrozen(Player player) {
-		return frozenPlayers.containsKey(player.getName());
+		return frozenPlayers.containsKey(player);
 	}
 	
 	@Override
 	public Point getFrozenPoint(Player player) {
-		if (!frozenPlayers.containsKey(player.getName())) {
+		if (!frozenPlayers.containsKey(player)) {
 			return null;
 		}
-		return frozenPlayers.get(player.getName());
+		return frozenPlayers.get(player);
 	}
 	
 	@Override
@@ -283,23 +283,23 @@ public class GameManager extends me.kitskub.myhungergames.api.GameManager {
 		if (HungerGames.hasPermission(player, Defaults.Perm.USER_AUTO_SUBSCRIBE)) return true;
 		if (game != null){
 			if (subscribedPlayers.get(new EquatableWeakReference<HungerGame>((HungerGame) game)) == null) {
-				subscribedPlayers.put(new EquatableWeakReference<HungerGame>(((HungerGame) game)), new HashSet<String>());
+				subscribedPlayers.put(new EquatableWeakReference<HungerGame>(((HungerGame) game)), new HashSet<Player>());
 			}
-			if (subscribedPlayers.get(new EquatableWeakReference<HungerGame>((HungerGame) game)).contains(player.getName())) return true;
+			if (subscribedPlayers.get(new EquatableWeakReference<HungerGame>((HungerGame) game)).contains(player)) return true;
 		}
-		return globalSubscribedPlayers.contains(player.getName());
+		return globalSubscribedPlayers.contains(player);
 	}
 	
 	@Override
 	public void removedSubscribedPlayer(Player player, Game game) {
 		if (game != null) {
 			if (subscribedPlayers.get(new EquatableWeakReference<HungerGame>((HungerGame) game)) == null) {
-				subscribedPlayers.put(new EquatableWeakReference<HungerGame>(((HungerGame) game)), new HashSet<String>());
+				subscribedPlayers.put(new EquatableWeakReference<HungerGame>(((HungerGame) game)), new HashSet<Player>());
 			}
-			subscribedPlayers.get(new EquatableWeakReference<HungerGame>((HungerGame) game)).remove(player.getName());
+			subscribedPlayers.get(new EquatableWeakReference<HungerGame>((HungerGame) game)).remove(player);
 		}
 		else {
-			globalSubscribedPlayers.remove(player.getName());
+			globalSubscribedPlayers.remove(player);
 		}
 	}
 	
@@ -307,17 +307,17 @@ public class GameManager extends me.kitskub.myhungergames.api.GameManager {
 	public void addSubscribedPlayer(Player player, Game game) {
 		if (game != null) {
 			if (subscribedPlayers.get(new EquatableWeakReference<HungerGame>((HungerGame) game)) == null) {
-				subscribedPlayers.put(new EquatableWeakReference<HungerGame>(((HungerGame) game)), new HashSet<String>());
+				subscribedPlayers.put(new EquatableWeakReference<HungerGame>(((HungerGame) game)), new HashSet<Player>());
 			}
-			subscribedPlayers.get(new EquatableWeakReference<HungerGame>((HungerGame) game)).add(player.getName());
+			subscribedPlayers.get(new EquatableWeakReference<HungerGame>((HungerGame) game)).add(player);
 		}
 		else {
-			globalSubscribedPlayers.add(player.getName());
+			globalSubscribedPlayers.add(player);
 		}
 	}
 	
-	public Set<String> getSubscribedPlayers(HungerGame game) {
-		Set<String> set = new HashSet<String>();
+	public Set<Player> getSubscribedPlayers(HungerGame game) {
+		Set<Player> set = new HashSet<Player>();
 		if (game != null) {
 			set.addAll(subscribedPlayers.get(new EquatableWeakReference<HungerGame>(game)));
 		} else {
@@ -327,11 +327,11 @@ public class GameManager extends me.kitskub.myhungergames.api.GameManager {
 	}
 	
 	public void addBackPoint(Player player) {
-		playerBackPoints.put(player.getName(), player.getTransform().getPosition());
+		playerBackPoints.put(player, player.getTransform().getPosition());
 	}
 	
 	public Point getAndRemoveBackPoint(Player player) {
-		return playerBackPoints.remove(player.getName());
+		return playerBackPoints.remove(player);
 	}
 	/*
 	private static class SponsorBeginPrompt extends NumericPrompt {

@@ -4,7 +4,7 @@
 
 	<groupId>me.kitskub.myhungergames</groupId>
 	<artifactId>MyHungerGames</artifactId>
-	<version>0.1-dev</version>
+	<version>v0.5</version>
 	<packaging>jar</packaging>
 
 	<name>MyHungerGames-Spout</name>

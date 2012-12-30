@@ -160,7 +160,7 @@ public interface Game {
 	
 	public void setSpawn(Transform newSpawn);
 
-	public List<String> getAllPlayers();
+	public List<Player> getAllPlayers();
 
 	public List<PlayerStat> getStats();
 	
@@ -178,7 +178,7 @@ public interface Game {
 
 	public void addCuboid(Point one, Point two);
 
-	public Map<String, List<String>> getSponsors();
+	public Map<Player, List<Player>> getSponsors();
 	
 	public Set<World> getWorlds();
 	

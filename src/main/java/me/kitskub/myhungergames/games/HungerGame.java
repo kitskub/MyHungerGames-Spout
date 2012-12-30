@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.spout.api.Spout;
+import org.spout.api.chat.channel.ChatChannel;
 import org.spout.api.chat.style.ChatStyle;
 import org.spout.api.command.CommandSource;
 import org.spout.api.entity.Entity;
@@ -59,10 +60,10 @@ import org.spout.vanilla.util.explosion.ExplosionModelSpherical;
 	
 public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 	// Per game
-	private final Map<String, PlayerStat> stats;
-	private final Map<String, Transform> spawnsTaken;
+	private final Map<Player, PlayerStat> stats;
+	private final Map<Player, Transform> spawnsTaken;
 	private final List<Transform> randomLocs;
-	private final Map<String, List<String>> sponsors; // Just a list for info, <sponsor, sponsee>
+	private final Map<Player, List<Player>> sponsors; // Just a list for info, <sponsor, sponsee>
 	private final SpectatorSponsoringRunnable spectatorSponsoringRunnable;
 	private final List<Long> startTimes;
 	private final List<Long> endTimes;
@@ -84,14 +85,15 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 
 	
 	// Temporary
-	private final Map<String, Transform> playerLocs;// For pausing
-	private final Map<String, Transform> spectators;
-	private final Map<String, Boolean> spectatorFlying; // If a spectator was flying
-	private final Map<String, Boolean> spectatorFlightAllowed; // If a spectator's flight was allowed
-	private final Map<String, GameMode> playerGameModes; // Whether a player was in survival when game started
-	private final List<String> playersFlying; // Players that were flying when they joined
-	private final List<String> playersCanFly; // Players that could fly when they joined
-	private final List<String> readyToPlay;
+	private final Map<Player, ChatChannel> channels;
+	private final Map<Player, Transform> playerLocs;// For pausing
+	private final Map<Player, Transform> spectators;
+	private final Map<Player, Boolean> spectatorFlying; // If a spectator was flying
+	private final Map<Player, Boolean> spectatorFlightAllowed; // If a spectator's flight was allowed
+	private final Map<Player, GameMode> playerGameModes; // Whether a player was in survival when game started
+	private final List<Player> playersFlying; // Players that were flying when they joined
+	private final List<Player> playersCanFly; // Players that could fly when they joined
+	private final List<Player> readyToPlay;
 	private GameCountdown countdown;
 	private Task locTask;
 
@@ -100,9 +102,9 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 	}
 
 	public HungerGame(final String name, final String setup) {
-		stats = new TreeMap<String, PlayerStat>();
-		spawnsTaken = new HashMap<String, Transform>();
-		sponsors = new HashMap<String, List<String>>();
+		stats = new TreeMap<Player, PlayerStat>();
+		spawnsTaken = new HashMap<Player, Transform>();
+		sponsors = new HashMap<Player, List<Player>>();
 		spectatorSponsoringRunnable = new SpectatorSponsoringRunnable(this);
 		randomLocs = new ArrayList<Transform>();
 		startTimes = new ArrayList<Long>();
@@ -122,14 +124,15 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 		spawn = null;
 		state = GameState.STOPPED;
 
-		readyToPlay = new ArrayList<String>();
-		playerLocs = new HashMap<String, Transform>();
-		spectators = new HashMap<String, Transform>();
-		spectatorFlying = new HashMap<String, Boolean>();
-		spectatorFlightAllowed = new HashMap<String, Boolean>();
-		playerGameModes = new HashMap<String, GameMode>();
-		playersFlying = new ArrayList<String>();
-		playersCanFly = new ArrayList<String>();
+		readyToPlay = new ArrayList<Player>();
+		channels = new HashMap<Player, ChatChannel>();
+		playerLocs = new HashMap<Player, Transform>();
+		spectators = new HashMap<Player, Transform>();
+		spectatorFlying = new HashMap<Player, Boolean>();
+		spectatorFlightAllowed = new HashMap<Player, Boolean>();
+		playerGameModes = new HashMap<Player, GameMode>();
+		playersFlying = new ArrayList<Player>();
+		playersCanFly = new ArrayList<Player>();
 		countdown = null;
 	}
 
@@ -144,7 +147,7 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 			ConfigurationNode spawnPointsSection = section.getNode("spawn-points");
 			for (String key : spawnPointsSection.getKeys(false)) {
 				String str = spawnPointsSection.getString(key);
-				Transform loc = null;
+				Transform loc;
 				try {
 					loc = GeneralUtils.parseToTransform(str);
 				} catch (WorldNotFoundException ex) {
@@ -163,8 +166,8 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 			ConfigurationNode chestsSection = section.getNode("chests");
 			for (String key : chestsSection.getKeys(false)) {
 				String[] parts = chestsSection.getString(key).split(",");
-				Point loc = null;
-				float weight = 1f;
+				Point loc;
+				float weight;
 				try {
 					loc = GeneralUtils.parseToPoint(parts[0]);
 					weight = Float.parseFloat(parts[1]);
@@ -212,7 +215,7 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 				String str = fixedChestsSection.getString(key);
 				String[] split = str.split(",");
 				if (split.length != 2) continue;
-				Point loc = null;
+				Point loc;
 				try {
 					loc = GeneralUtils.parseToPoint(split[0]);
 				} catch (WorldNotFoundException ex) {
@@ -327,7 +330,7 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 			ChatUtils.error(player, "That game does not exist anymore.");
 			return false;
 		}
-		if (readyToPlay.contains(player.getName())) {
+		if (readyToPlay.contains(player)) {
 			ChatUtils.error(player, "You have already cast your vote that you are ready to play.");
 			return false;
 		}
@@ -343,7 +346,7 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 			ChatUtils.error(player, "%s has been paused.", name);
 			return false;
 		}
-		readyToPlay.add(player.getName());
+		readyToPlay.add(player);
 		String mess = Lang.getVoteMessage(setup).replace("<player>", player.getName()).replace("<game>", this.name);
 		ChatUtils.broadcast(this, mess);
 		int minVote = Config.MIN_VOTE.getInt(setup);
@@ -367,11 +370,10 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 	}
 	
 	public void clearWaitingPlayers() {
-		for (Iterator<String> it = stats.keySet().iterator(); it.hasNext();) {
-			String stat = it.next();
-			if (!stats.get(stat).getState().equals(PlayerState.WAITING)) continue;
-			stats.get(stat).setState(PlayerState.NOT_IN_GAME);
-			Player player = Spout.getEngine().getPlayer(stat, false);
+		for (Iterator<Player> it = stats.keySet().iterator(); it.hasNext();) {
+			Player player = it.next();
+			if (!stats.get(player).getState().equals(PlayerState.WAITING)) continue;
+			stats.get(player).setState(PlayerState.NOT_IN_GAME);
 			ItemStack[] contents = (ItemStack[]) player.get(PlayerInventory.class).getMain().toArray();
 			List<ItemStack> list = new ArrayList<ItemStack>();
 			for (ItemStack i : contents) {
@@ -380,8 +382,8 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 			contents = list.toArray(new ItemStack[list.size()]);
 			playerLeaving(player, false);
 			for (ItemStack i : contents) Item.dropNaturally(player.getTransform().getPosition(), i);
-			GameManager.INSTANCE.clearGamesForPlayer(stat, this);
-			stats.remove(stat);
+			GameManager.INSTANCE.clearGamesForPlayer(player, this);
+			stats.remove(player);
 		}
 	}
 
@@ -394,7 +396,7 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 			ChatUtils.error(player, Lang.getNotRunning(setup).replace("<game>", name));
 			return false;
 		}
-		spectators.put(player.getName(), player.getTransform().getTransform());
+		spectators.put(player, player.getTransform().getTransform());
 		if (Config.SPECTATOR_SPONSOR_PERIOD.getInt(setup) != 0) {
 			 spectatorSponsoringRunnable.addSpectator(player);
 		}
@@ -402,8 +404,8 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 		Transform loc = randomLocs.get(rand.nextInt(randomLocs.size()));
 		if (spectated != null) loc = spectated.getTransform().getTransform();
 		player.teleport(loc);
-		spectatorFlying.put(player.getName(), player.get(Human.class).isFlying());
-		spectatorFlightAllowed.put(player.getName(), player.get(Human.class).canFly());
+		spectatorFlying.put(player, player.get(Human.class).isFlying());
+		spectatorFlightAllowed.put(player, player.get(Human.class).canFly());
 		player.get(Human.class).setCanFly(true);
 		player.get(Human.class).setFlying(true);
 		for (Player p : getRemainingPlayers()) {
@@ -415,18 +417,18 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 
 	@Override
 	public boolean isSpectating(Player player) {
-		return spectators.containsKey(player.getName());
+		return spectators.containsKey(player);
 	}
 
 	public void removeSpectator(Player player) {
-		if (!spectators.containsKey(player.getName())) {
+		if (!spectators.containsKey(player)) {
 			ChatUtils.error(player, "You are not spectating that game.");
 			return;
 		}
 		spectatorSponsoringRunnable.removeSpectator(player);
-		player.get(Human.class).setFlying(spectatorFlying.get(player.getName()));
-		player.get(Human.class).setCanFly(spectatorFlightAllowed.get(player.getName()));
-		player.teleport(spectators.remove(player.getName()));
+		player.get(Human.class).setFlying(spectatorFlying.get(player));
+		player.get(Human.class).setCanFly(spectatorFlightAllowed.get(player));
+		player.teleport(spectators.remove(player));
 		for (Player p : getRemainingPlayers()) {
 			p.setVisible(player, true);
 		}
@@ -451,8 +453,7 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 		endTimes.add(System.currentTimeMillis());
 		if (countdown != null) countdown.cancel();
 		if (state == PAUSED) { // Needed for inventory stuff
-			for(String playerName : playerLocs.keySet()) {
-				Player p = Spout.getEngine().getPlayer(playerName, false);
+			for(Player p : playerLocs.keySet()) {
 				if (p == null) continue;
 				playerEntering(p, true);
 				InventorySave.loadGameInventory(p);
@@ -460,7 +461,7 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 		}
 		StatHandler.updateGame(this);
 		for (Player player : getRemainingPlayers()) {
-			stats.get(player.getName()).setState(PlayerState.NOT_IN_GAME);
+			stats.get(player).setState(PlayerState.NOT_IN_GAME);
 			ItemStack[] contents = (ItemStack[]) player.get(PlayerInventory.class).getMain().toArray();
 			List<ItemStack> list = new ArrayList<ItemStack>();
 			for (ItemStack i : contents) {
@@ -477,13 +478,12 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 			teleportPlayerToSpawn(player);
 			if (isFinished) GeneralUtils.rewardPlayer(player);
 		}
-		for (String stat : stats.keySet()) {
+		for (Player stat : stats.keySet()) {
 			StatHandler.updateStat(stats.get(stat));// TODO: this might be a little slow to do it this way. Thread?
 			GameManager.INSTANCE.clearGamesForPlayer(stat, this);
 		}
 		stats.clear();
-		for (String spectatorName : spectators.keySet()) {
-			Player spectator = Spout.getEngine().getPlayer(spectatorName, false);
+		for (Player spectator : spectators.keySet()) {
 			if (spectator == null) continue;
 			removeSpectator(spectator);
 		}
@@ -556,13 +556,12 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 		ResetHandler.gameStarting(this);
 		releasePlayers();
 		fillInventories();
-		for (String playerName : stats.keySet()) {
-			Player p = Spout.getEngine().getPlayer(playerName, false);
+		for (Player p : stats.keySet()) {
 			if (p == null) continue;
 			World world = p.getWorld();
 			world.getComponentHolder().get(VanillaSky.class).setTime(0L);
 			p.get(HungerComponent.class).setHunger(20);
-			stats.get(playerName).setState(PlayerStat.PlayerState.PLAYING);
+			stats.get(p).setState(PlayerStat.PlayerState.PLAYING);
 		}
 		state = RUNNING;
 		run(); // Add at least one randomLoc
@@ -613,16 +612,15 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 		if (event.isCancelled()) {
 			return "Start was cancelled.";
 		}
-		for(String playerName : playerLocs.keySet()) {
-			Player p = Spout.getEngine().getPlayer(playerName, false);
+		for(Player p : playerLocs.keySet()) {
 			if (p == null) continue;
-			stats.get(p.getName()).setState(PlayerState.PLAYING);
+			stats.get(p).setState(PlayerState.PLAYING);
 			playerEntering(p, true);
 			InventorySave.loadGameInventory(p);
 			World world = p.getWorld();
 			world.getComponentHolder().get(VanillaSky.class).setTime(0L);
 			p.get(HungerComponent.class).setHunger(20);
-			stats.get(playerName).setState(PlayerStat.PlayerState.PLAYING);
+			stats.get(p).setState(PlayerStat.PlayerState.PLAYING);
 		}
 		state = RUNNING;
 		countdown = null;
@@ -657,14 +655,13 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 		}
 		for(Player p : getRemainingPlayers()) {
 			if (p == null) continue;
-			stats.get(p.getName()).setState(PlayerState.GAME_PAUSED);
-			playerLocs.put(p.getName(), p.getTransform().getTransform());
+			stats.get(p).setState(PlayerState.GAME_PAUSED);
+			playerLocs.put(p, p.getTransform().getTransform());
 			InventorySave.saveAndClearGameInventory(p);
 			playerLeaving(p, true);
 			teleportPlayerToSpawn(p);
 		}
-		for (String spectatorName : spectators.keySet()) {
-			Player spectator = Spout.getEngine().getPlayer(spectatorName, false);
+		for (Player spectator : spectators.keySet()) {
 			removeSpectator(spectator);
 		}
 		Spout.getEventManager().callEvent(new GamePauseEvent(this));
@@ -672,8 +669,7 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 	}
 	
 	private void releasePlayers() {
-		for (String playerName : stats.keySet()) {
-			Player p = Spout.getEngine().getPlayer(playerName, false);
+		for (Player p : stats.keySet()) {
 			if (p == null) continue;
 			GameManager.INSTANCE.unfreezePlayer(p);
 		}
@@ -742,11 +738,11 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 			ChatUtils.error(player, "You are not allowed to rejoin a game.");
 			return false;
 		}
-		if (stats.get(player.getName()).getState() == PlayerState.PLAYING){
+		if (stats.get(player).getState() == PlayerState.PLAYING){
 			ChatUtils.error(player, "You can't rejoin a game while you are in it.");
 			return false;
 		}
-		if (!stats.containsKey(player.getName()) || stats.get(player.getName()).getState() != PlayerState.NOT_PLAYING) {
+		if (!stats.containsKey(player) || stats.get(player).getState() != PlayerState.NOT_PLAYING) {
 			ChatUtils.error(player, Lang.getNotInGame(setup).replace("<game>", name));
 			return false;
 		}
@@ -754,7 +750,7 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 		Spout.getEventManager().callEvent(event);
 		if (event.isCancelled()) return false;
 		if (!playerEntering(player, false)) return false;
-		stats.get(player.getName()).setState(PlayerState.PLAYING);
+		stats.get(player).setState(PlayerState.PLAYING);
 		
 		String mess = Lang.getRejoinMessage(setup);
 		mess = mess.replace("<player>", player.getName()).replace("<game>", name);
@@ -768,7 +764,7 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 		    ChatUtils.error(player, "You are already in a game. Leave that game before joining another.");
 		    return false;
 	    }
-	    if (stats.containsKey(player.getName())) {
+	    if (stats.containsKey(player)) {
 		    ChatUtils.error(player, Lang.getInGame(setup).replace("<game>", name));
 		    return false;
 	    }
@@ -785,15 +781,15 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 	    Spout.getEventManager().callEvent(event);
 	    if (event.isCancelled()) return false;
 	    if(!playerEntering(player, false)) return false;
-	    stats.put(player.getName(), GameManager.INSTANCE.createStat(this, player));
+	    stats.put(player, GameManager.INSTANCE.createStat(this, player));
 	    String mess = Lang.getJoinMessage(setup);
 	    mess = mess.replace("<player>", player.getName()).replace("<game>", name);
 	    ChatUtils.broadcast(this, mess);
 	    if (state == RUNNING) {
-		    stats.get(player.getName()).setState(PlayerState.PLAYING);
+		    stats.get(player).setState(PlayerState.PLAYING);
 	    }
 	    else {
-		    stats.get(player.getName()).setState(PlayerState.WAITING);
+		    stats.get(player).setState(PlayerState.WAITING);
 		    if (Config.AUTO_VOTE.getBoolean(setup)) addReadyPlayer(player);
 	    }
 	    return true;
@@ -834,10 +830,10 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 	    Transform loc;
 	    if (!fromTemporary) {
 		    loc = getNextOpenSpawnPoint();
-		    spawnsTaken.put(player.getName(), loc);
+		    spawnsTaken.put(player, loc);
 	    }
 	    else {
-		    loc = spawnsTaken.get(player.getName());
+		    loc = spawnsTaken.get(player);
 	    }
 	    GameManager.INSTANCE.addSubscribedPlayer(player, this);
 	    GameManager.INSTANCE.addBackPoint(player);
@@ -845,17 +841,17 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 	    player.teleport(loc);
 	    if (state != RUNNING && Config.FREEZE_PLAYERS.getBoolean(setup)) GameManager.INSTANCE.freezePlayer(player);
 	    if (Config.FORCE_SURVIVAL.getBoolean(setup)) {
-		    playerGameModes.put(player.getName(), player.get(Human.class).getGameMode());
+		    playerGameModes.put(player, player.get(Human.class).getGameMode());
 		    player.get(Human.class).setGamemode(GameMode.SURVIVAL);
 	    }
 	    if (Config.DISABLE_FLY.getBoolean(setup)) {
 		    if (!HungerGames.hasPermission(player, Perm.ADMIN_ALLOW_FLIGHT)) {
 			    if (player.get(Human.class).canFly()) {
-				playersCanFly.add(player.getName());
+				playersCanFly.add(player);
 				player.get(Human.class).setCanFly(false);
 			    }
 			    if (player.get(Human.class).isFlying()) {
-				    playersFlying.add(player.getName());
+				    playersFlying.add(player);
 				    player.get(Human.class).setFlying(false);
 			    }
 			    
@@ -868,10 +864,13 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 			    player.get(PlayerInventory.class).getMain().addAll(Arrays.asList((ItemStack[]) ItemConfig.getKit(kit).toArray()));
 		    }
 	    }
-	    for (String string : spectators.keySet()) {
-		    Player spectator = Spout.getEngine().getPlayer(string, false);
+	    for (Player spectator : spectators.keySet()) {
 		    if (spectator == null) continue;
 		    player.setVisible(spectator, false);
+	    }
+	    if (Config.ISOLATE_PLAYER_CHAT.getBoolean(setup)) {
+		    channels.put(player, player.getActiveChannel());
+		    player.setActiveChannel(new HungerGameChatChannel(name, player));
 	    }
 	    return true;
 	}
@@ -897,11 +896,11 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 		}
 
 		if (!Config.ALLOW_REJOIN.getBoolean(setup)) {
-			stats.get(player.getName()).die();
+			stats.get(player).die();
 		}
 		else {
-			stats.get(player.getName()).setState(PlayerState.NOT_PLAYING);
-			stats.get(player.getName()).death(PlayerStat.NODODY);
+			stats.get(player).setState(PlayerState.NOT_PLAYING);
+			stats.get(player).death(PlayerStat.NODODY);
 		}
 		if (callEvent) Spout.getEventManager().callEvent(new PlayerLeaveGameEvent(this, player, PlayerLeaveGameEvent.Type.LEAVE));
 		if (state == PAUSED) playerEntering(player, true);
@@ -924,16 +923,16 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 		    return false;
 	    }
 	    if (callEvent)  Spout.getEventManager().callEvent(new PlayerLeaveGameEvent(this, player, PlayerLeaveGameEvent.Type.QUIT));
-	    boolean wasPlaying = stats.get(player.getName()).getState() == PlayerState.PLAYING || stats.get(player.getName()).getState() == PlayerState.WAITING;
+	    boolean wasPlaying = stats.get(player).getState() == PlayerState.PLAYING || stats.get(player).getState() == PlayerState.WAITING;
 	    if (wasPlaying) {
 		    dropInventory(player);
 	    }
 	    if(state == RUNNING) {
-		    stats.get(player.getName()).die();
+		    stats.get(player).die();
 	    }
 	    else {
-		    stats.remove(player.getName());
-		    GameManager.INSTANCE.clearGamesForPlayer(player.getName(), this);
+		    stats.remove(player);
+		    GameManager.INSTANCE.clearGamesForPlayer(player, this);
 	    }
 	    playerLeaving(player, false);
 	    if (wasPlaying || state != RUNNING) {
@@ -953,26 +952,26 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 	 * @param player
 	 */
 	private synchronized void playerLeaving(Player player, boolean temporary) {
-		for (String string : spectators.keySet()) {
-		    Player spectator = Spout.getEngine().getPlayer(string, false);
+		player.setActiveChannel(channels.remove(player));
+		for (Player spectator : spectators.keySet()) {
 		    if (spectator == null) continue;
 		    player.setVisible(spectator, true);
 		}
 		GameManager.INSTANCE.unfreezePlayer(player);
 		InventorySave.loadInventory(player);
-		if (playerGameModes.containsKey(player.getName())) {
-			player.get(Human.class).setGamemode(playerGameModes.remove(player.getName()));
+		if (playerGameModes.containsKey(player)) {
+			player.get(Human.class).setGamemode(playerGameModes.remove(player));
 		}
 		if (Config.DISABLE_FLY.getBoolean(setup)) {
 			if (!HungerGames.hasPermission(player, Perm.ADMIN_ALLOW_FLIGHT)) {
-				player.get(Human.class).setCanFly(playersCanFly.remove(player.getName()));
-				player.get(Human.class).setFlying(playersFlying.remove(player.getName()));
+				player.get(Human.class).setCanFly(playersCanFly.remove(player));
+				player.get(Human.class).setFlying(playersFlying.remove(player));
 			}
 		}
 		if (Config.HIDE_PLAYERS.getBoolean(setup)) player.get(Human.class).setSneaking(false);
-		readyToPlay.remove(player.getName());
+		readyToPlay.remove(player);
 		if (!temporary) {
-			spawnsTaken.remove(player.getName());
+			spawnsTaken.remove(player);
 			PlayerQueueHandler.addPlayer(player);
 			GameManager.INSTANCE.removedSubscribedPlayer(player, this);
 		}
@@ -1029,7 +1028,7 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 		List<Team> teamsLeft = new ArrayList<Team>();
 		int left = 0;
 		for (Player p : remaining) {
-			Team team = stats.get(p.getName()).getTeam();
+			Team team = stats.get(p).getTeam();
 			if (team == null) {
 				left++;
 			}
@@ -1039,7 +1038,7 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 			}
 		}
 		if (left < 2) {
-			GameEndEvent event = null;
+			GameEndEvent event;
 			if (teamsLeft.size() > 0) {
 				ChatUtils.sendToTeam(teamsLeft.get(0), "Congratulations! Your team won!");
 				event = new GameEndEvent(this, teamsLeft.get(0));
@@ -1085,8 +1084,8 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 	public boolean contains(Player... players) {
 	    if (state == DELETED) return false;
 	    for (Player player : players) {
-		if (!stats.containsKey(player.getName())) return false;
-		PlayerState pState = stats.get(player.getName()).getState();
+		if (!stats.containsKey(player)) return false;
+		PlayerState pState = stats.get(player).getState();
 		if (pState == PlayerState.NOT_IN_GAME || pState == PlayerState.DEAD) return false;
 	    }
 	    return true;
@@ -1095,8 +1094,8 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 	@Override
 	public boolean isPlaying(Player... players) {
 	    for (Player player : players) {
-		if (state != RUNNING || !stats.containsKey(player.getName()) 
-			|| stats.get(player.getName()).getState() != PlayerState.PLAYING ){
+		if (state != RUNNING || !stats.containsKey(player) 
+			|| stats.get(player).getState() != PlayerState.PLAYING ){
 		    return false;
 		}
 	    }
@@ -1105,13 +1104,13 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 
 	
 	public void killed(final Player killer, final Player killed, PlayerDeathEvent deathEvent) {
-		if (state == DELETED || state != RUNNING || stats.get(killed.getName()).getState() != PlayerState.PLAYING) return;
+		if (state == DELETED || state != RUNNING || stats.get(killed).getState() != PlayerState.PLAYING) return;
 		killed.get(Human.class).getHealth().setHealth(20, HealthChangeCause.PLUGIN);
 		killed.get(HungerComponent.class).setHunger(20);
-		PlayerStat killedStat = stats.get(killed.getName());
+		PlayerStat killedStat = stats.get(killed);
 		PlayerKillEvent event;
 		if (killer != null) {
-			PlayerStat killerStat = stats.get(killer.getName());
+			PlayerStat killerStat = stats.get(killer);
 			killerStat.kill(killed.getName());
 			String message = Lang.getKillMessage(setup).replace("<killer>", killer.getName()).replace("<killed>", killed.getName()).replace("<game>", name);
 			event = new PlayerKillEvent(this, killer, killed, message);
@@ -1154,7 +1153,7 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 		}
 		else {
 			if (Config.SPAWNPOINT_ON_DEATH.getBoolean(setup)) {
-				Transform respawn = spawnsTaken.get(killed.getName());
+				Transform respawn = spawnsTaken.get(killed);
 				TeleportListener.allowTeleport(killed);
 				killed.teleport(respawn);
 			}
@@ -1178,10 +1177,9 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 	@Override
 	public List<Player> getRemainingPlayers() {
 	    List<Player> remaining = new ArrayList<Player>();
-	    for (String playerName : stats.keySet()) {
-		Player player = Spout.getEngine().getPlayer(playerName, false);
+	    for (Player player : stats.keySet()) {
 		if (player == null) continue;
-		PlayerStat stat = stats.get(playerName);
+		PlayerStat stat = stats.get(player);
 		if (stat.getState() == PlayerState.PLAYING || stat.getState() == PlayerState.GAME_PAUSED || stat.getState() == PlayerState.WAITING) {
 		    remaining.add(player);
 		}
@@ -1191,13 +1189,13 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 
 	@Override
 	public PlayerStat getPlayerStat(Player player) {
-		return stats.get(player.getName());
+		return stats.get(player);
 	}
 
 	@Override
 	public void listStats(CommandSource cs) {
 		int living = 0, dead = 0;
-		List<String> players = new ArrayList<String>(stats.keySet());
+		List<Player> players = new ArrayList<Player>(stats.keySet());
 		String mess = "";
 		for (int cntr = 0; cntr < players.size(); cntr++) {
 			PlayerStat stat = stats.get(players.get(cntr));
@@ -1329,14 +1327,12 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 		while (iterator.hasNext()) {
 			if (GeneralUtils.equals(loc, l = iterator.next().getPosition())) {
 				iterator.remove();
-				for (String playerName : spawnsTaken.keySet()) {
-					Transform comp = spawnsTaken.get(playerName);
+				for (Player player : spawnsTaken.keySet()) {
+					Transform comp = spawnsTaken.get(player);
 					if (GeneralUtils.equals(l, comp.getPosition())) {
-						spawnsTaken.remove(playerName);
-						if (Spout.getEngine().getPlayer(playerName, false) == null) continue;
-						ChatUtils.error(Spout.getEngine().getPlayer(playerName, false),
-							"Your spawn point has been recently removed. Try rejoining by typing '/hg rejoin %s'", name);
-						leave(Spout.getEngine().getPlayer(playerName, false), true);
+						spawnsTaken.remove(player);
+						ChatUtils.error(player, "Your spawn point has been recently removed. Try rejoining by typing '/hg rejoin %s'", name);
+						leave(player, true);
 					}
 				}
 				return true;
@@ -1359,9 +1355,7 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 		if (!flag) {
 			if (!flag) stopGame(false);
 			state = DISABLED; // TODO do this better
-			for (String s : stats.keySet()) {
-				Player p = Spout.getEngine().getPlayer(s, false);
-				if (p == null) continue;
+			for (Player p : stats.keySet()) {
 				playerLeaving(p, false);
 				teleportPlayerToSpawn(p);
 			}
@@ -1377,8 +1371,8 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 	}
 
 	@Override
-	public List<String> getAllPlayers() {
-		return new ArrayList<String>(stats.keySet());
+	public List<Player> getAllPlayers() {
+		return new ArrayList<Player>(stats.keySet());
 	}
 
 	@Override
@@ -1426,12 +1420,12 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 	}
 
 	@Override
-	public Map<String, List<String>> getSponsors() {
+	public Map<Player, List<Player>> getSponsors() {
 		return Collections.unmodifiableMap(sponsors);
 	}
 
-	public void addSponsor(String player, String playerToBeSponsored) {
-		if (sponsors.get(player) == null) sponsors.put(player, new ArrayList<String>());
+	public void addSponsor(Player player, Player playerToBeSponsored) {
+		if (sponsors.get(player) == null) sponsors.put(player, new ArrayList<Player>());
 		sponsors.get(player).add(playerToBeSponsored);
 	}
 	

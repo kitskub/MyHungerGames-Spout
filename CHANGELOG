@@ -1,3 +1,7 @@
+v0.5
+- Ported almost everything to Spout
+
+Everything below is pre-Spout port
 v0.9
 - Added about command
 - Allow console to do some commands

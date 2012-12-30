@@ -20,15 +20,16 @@ import org.spout.api.event.player.PlayerInteractEvent;
 import org.spout.api.geo.cuboid.Block;
 import org.spout.api.geo.discrete.Point;
 import org.spout.api.inventory.ItemStack;
+import org.spout.api.material.BlockMaterial;
 import org.spout.api.material.Material;
 import org.spout.api.scheduler.TaskPriority;
 import org.spout.vanilla.event.entity.EntityExplodeEvent;
 import org.spout.vanilla.inventory.Container;
 
 public class InternalResetter extends Resetter implements Listener, Runnable {
-	private static final Map<EquatableWeakReference<HungerGame>, Map<Point, Material>> changedBlocks = Collections.synchronizedMap(new WeakHashMap<EquatableWeakReference<HungerGame>, Map<Point, Material>>());//TODO make better
+	private static final Map<EquatableWeakReference<HungerGame>, Map<Point, BlockMaterial>> changedBlocks = Collections.synchronizedMap(new WeakHashMap<EquatableWeakReference<HungerGame>, Map<Point, BlockMaterial>>());//TODO make better deque?
 	private static final Map<EquatableWeakReference<HungerGame>, Map<Point, ItemStack[]>> changedInvs = Collections.synchronizedMap(new WeakHashMap<EquatableWeakReference<HungerGame>, Map<Point, ItemStack[]>>());
-	private static final Map<Point, Material> toCheck = new ConcurrentHashMap<Point, Material>();
+	private static final Map<Point, BlockMaterial> toCheck = new ConcurrentHashMap<Point, BlockMaterial>();
 	private static final Map<Point, ItemStack[]> toCheckInvs = new ConcurrentHashMap<Point, ItemStack[]>();
 
 
@@ -47,7 +48,7 @@ public class InternalResetter extends Resetter implements Listener, Runnable {
 		EquatableWeakReference<HungerGame> eMap = new EquatableWeakReference<HungerGame>(game);
 		if(!changedBlocks.containsKey(new EquatableWeakReference<HungerGame>(game))) return true;
 		for(Point l : changedBlocks.get(eMap).keySet()) {
-			Material state = changedBlocks.get(eMap).get(l);
+			BlockMaterial state = changedBlocks.get(eMap).get(l);
 			l.getBlock().setMaterial(state);
 
 		}
@@ -100,9 +101,9 @@ public class InternalResetter extends Resetter implements Listener, Runnable {
 		}
 	}
 
-	private static synchronized void addComponent(HungerGame game, Point loc, Material state) {
+	private static synchronized void addComponent(HungerGame game, Point loc, BlockMaterial state) {
 		EquatableWeakReference<HungerGame> eMap = new EquatableWeakReference<HungerGame>(game);
-		if (!changedBlocks.containsKey(eMap)) changedBlocks.put(eMap, new HashMap<Point, Material>());
+		if (!changedBlocks.containsKey(eMap)) changedBlocks.put(eMap, new HashMap<Point, BlockMaterial>());
 		if (changedBlocks.get(eMap).containsKey(loc)) return; // Don't want to erase the original block
 		changedBlocks.get(eMap).put(loc, state);
 	}

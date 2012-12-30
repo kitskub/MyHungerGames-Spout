@@ -12,6 +12,7 @@ import me.kitskub.myhungergames.Logging;
 import me.kitskub.myhungergames.games.HungerGame;
 import me.kitskub.myhungergames.utils.ConnectionUtils;
 import me.kitskub.myhungergames.stats.PlayerStat.PlayerState;
+import org.spout.api.entity.Player;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -58,8 +59,8 @@ public class StatHandler {
 			map.put("winner", game.getRemainingPlayers().get(0).getName());
 		}
 		StringBuilder playersSB = new StringBuilder();
-		for (String s : game.getAllPlayers()) {
-			playersSB.append("{").append(s).append("}");
+		for (Player p : game.getAllPlayers()) {
+			playersSB.append("{").append(p.getName()).append("}");
 		}
 		map.put("players", playersSB.toString());
 		long totalDuration = 0;
@@ -68,9 +69,9 @@ public class StatHandler {
 		}
 		map.put("totalDuration", new Time(totalDuration).toString());
 		StringBuilder sponsorsSB = new StringBuilder();
-		for (String s : game.getSponsors().keySet()) {
-			sponsorsSB.append("{").append(s).append(":");
-			for (String sponsee : game.getSponsors().get(s)) sponsorsSB.append("{").append(sponsee).append("}");
+		for (Player s : game.getSponsors().keySet()) {
+			sponsorsSB.append("{").append(s.getName()).append(":");
+			for (Player sponsee : game.getSponsors().get(s)) sponsorsSB.append("{").append(sponsee.getName()).append("}");
 			sponsorsSB.append("}");
 		}
 		map.put("sponsors", sponsorsSB.toString());
