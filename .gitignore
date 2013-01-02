@@ -2,4 +2,6 @@
 .project
 nb-configuration.xml
 src/main/php/config.php
-/target/
+target/classes
+target/surefire
+target/maven-archiver
