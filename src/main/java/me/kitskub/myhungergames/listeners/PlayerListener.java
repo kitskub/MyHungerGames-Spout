@@ -13,8 +13,8 @@ import org.spout.api.event.Order;
 import org.spout.api.event.player.PlayerJoinEvent;
 import org.spout.api.event.player.PlayerKickEvent;
 import org.spout.api.event.player.PlayerLeaveEvent;
-import org.spout.vanilla.event.player.PlayerDeathEvent;
-import org.spout.vanilla.event.player.PlayerToggleSneakingEvent;
+import org.spout.vanilla.plugin.event.player.PlayerDeathEvent;
+import org.spout.vanilla.plugin.event.player.PlayerToggleSneakingEvent;
 
 
 public class PlayerListener implements Listener {

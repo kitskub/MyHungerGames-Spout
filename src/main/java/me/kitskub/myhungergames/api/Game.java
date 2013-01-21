@@ -11,7 +11,7 @@ import org.spout.api.entity.Player;
 import org.spout.api.geo.World;
 import org.spout.api.geo.discrete.Point;
 import org.spout.api.geo.discrete.Transform;
-import org.spout.vanilla.component.substance.material.chest.Chest;
+import org.spout.vanilla.plugin.component.substance.material.chest.Chest;
 
 public interface Game {
 	public boolean isSpectating(Player player);

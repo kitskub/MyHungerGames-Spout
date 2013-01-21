@@ -23,8 +23,8 @@ import org.spout.api.inventory.ItemStack;
 import org.spout.api.material.BlockMaterial;
 import org.spout.api.material.Material;
 import org.spout.api.scheduler.TaskPriority;
-import org.spout.vanilla.event.entity.EntityExplodeEvent;
-import org.spout.vanilla.inventory.Container;
+import org.spout.vanilla.plugin.event.entity.EntityExplodeEvent;
+import org.spout.vanilla.plugin.inventory.Container;
 
 public class InternalResetter extends Resetter implements Listener, Runnable {
 	private static final Map<EquatableWeakReference<HungerGame>, Map<Point, BlockMaterial>> changedBlocks = Collections.synchronizedMap(new WeakHashMap<EquatableWeakReference<HungerGame>, Map<Point, BlockMaterial>>());//TODO make better deque?

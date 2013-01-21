@@ -10,8 +10,8 @@ import org.spout.api.command.Command;
 import org.spout.api.command.CommandContext;
 import org.spout.api.command.CommandSource;
 import org.spout.api.entity.Player;
-import org.spout.vanilla.component.misc.HealthComponent;
-import org.spout.vanilla.event.cause.HealthChangeCause;
+import org.spout.vanilla.plugin.component.misc.HealthComponent;
+import org.spout.vanilla.plugin.event.cause.HealthChangeCause;
 
 
 public class KillCommand extends HGCommand {

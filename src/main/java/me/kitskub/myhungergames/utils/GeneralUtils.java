@@ -20,8 +20,8 @@ import org.spout.api.geo.discrete.Transform;
 import org.spout.api.inventory.ItemStack;
 import org.spout.api.math.MathHelper;
 import org.spout.api.math.Vector3;
-import org.spout.vanilla.component.inventory.PlayerInventory;
-import org.spout.vanilla.component.substance.material.chest.Chest;
+import org.spout.vanilla.plugin.component.inventory.PlayerInventory;
+import org.spout.vanilla.plugin.component.substance.material.chest.Chest;
 
 public class GeneralUtils {
 	public static boolean equals(Point loc1, Point loc2) {

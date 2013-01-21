@@ -12,21 +12,17 @@ import java.util.*;
 import me.kitskub.myhungergames.utils.ChatUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.spout.api.chat.ChatArguments;
-import org.spout.api.chat.channel.ChatChannel;
 import org.spout.api.chat.conversation.Conversation;
 import org.spout.api.chat.conversation.ResponseHandler;
 import org.spout.api.chat.style.ChatStyle;
-import org.spout.api.command.CommandSource;
 
 import org.spout.api.entity.Player;
 import org.spout.api.geo.discrete.Point;
 import org.spout.api.inventory.ItemStack;
-import org.spout.api.map.DefaultedKey;
-import org.spout.api.map.DefaultedKeyImpl;
 import org.spout.api.util.config.ConfigurationNode;
-import org.spout.vanilla.component.inventory.PlayerInventory;
-import org.spout.vanilla.component.substance.Item;
-import org.spout.vanilla.material.enchantment.*;
+import org.spout.vanilla.plugin.component.inventory.PlayerInventory;
+import org.spout.vanilla.plugin.component.substance.Item;
+import org.spout.vanilla.plugin.material.enchantment.*;
 
 
 public class GameManager extends me.kitskub.myhungergames.api.GameManager {

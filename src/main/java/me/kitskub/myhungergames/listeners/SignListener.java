@@ -23,8 +23,8 @@ import org.spout.api.scheduler.Task;
 import org.spout.api.scheduler.TaskPriority;
 import org.spout.api.util.config.ConfigurationNode;
 import org.spout.api.util.config.yaml.YamlConfiguration;
-import org.spout.vanilla.component.substance.material.Sign;
-import org.spout.vanilla.material.VanillaMaterials;
+import org.spout.vanilla.plugin.component.substance.material.Sign;
+import org.spout.vanilla.plugin.material.VanillaMaterials;
 
 public class SignListener implements Runnable, Listener {
 

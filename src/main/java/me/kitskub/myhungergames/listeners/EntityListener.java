@@ -10,8 +10,8 @@ import org.spout.api.entity.Player;
 import org.spout.api.event.EventHandler;
 import org.spout.api.event.Listener;
 import org.spout.api.event.Order;
-import org.spout.vanilla.event.cause.DamageCause;
-import org.spout.vanilla.event.entity.EntityDamageEvent;
+import org.spout.vanilla.plugin.event.cause.DamageCause;
+import org.spout.vanilla.plugin.event.entity.EntityDamageEvent;
 
 public class EntityListener implements Listener{
 	

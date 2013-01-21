@@ -21,7 +21,7 @@ import org.spout.api.geo.discrete.Point;
 import org.spout.api.geo.discrete.Transform;
 import org.spout.api.math.Quaternion;
 import org.spout.api.math.Vector3;
-import org.spout.vanilla.component.substance.material.chest.Chest;
+import org.spout.vanilla.plugin.component.substance.material.chest.Chest;
 
 public class SessionListener implements Listener {
 	private static final Map<String, Session> sessions = new HashMap<String, Session>(); // <player, session>>

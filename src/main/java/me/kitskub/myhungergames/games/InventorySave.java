@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.spout.api.entity.Player;
 import org.spout.api.inventory.ItemStack;
-import org.spout.vanilla.component.inventory.PlayerInventory;
+import org.spout.vanilla.plugin.component.inventory.PlayerInventory;
 
 public class InventorySave {
 	private static final Map<Player, InventorySave> savedInventories = new HashMap<Player, InventorySave>();

@@ -13,9 +13,9 @@ import org.spout.api.inventory.ItemStack;
 import org.spout.api.material.Material;
 import org.spout.api.util.config.ConfigurationNode;
 import org.spout.api.util.config.ConfigurationNodeSource;
-import org.spout.vanilla.material.VanillaMaterial;
-import org.spout.vanilla.material.enchantment.Enchantment;
-import org.spout.vanilla.material.enchantment.Enchantments;
+import org.spout.vanilla.plugin.material.VanillaMaterial;
+import org.spout.vanilla.plugin.material.enchantment.Enchantment;
+import org.spout.vanilla.plugin.material.enchantment.Enchantments;
 
 public class ConfigUtils {
 	

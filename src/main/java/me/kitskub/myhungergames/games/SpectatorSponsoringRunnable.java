@@ -16,9 +16,9 @@ import org.spout.api.chat.style.ChatStyle;
 import org.spout.api.entity.Player;
 import org.spout.api.inventory.ItemStack;
 import org.spout.api.scheduler.Task;
-import org.spout.vanilla.component.inventory.PlayerInventory;
-import org.spout.vanilla.component.substance.Item;
-import org.spout.vanilla.material.enchantment.Enchantment;
+import org.spout.vanilla.plugin.component.inventory.PlayerInventory;
+import org.spout.vanilla.plugin.component.substance.Item;
+import org.spout.vanilla.plugin.material.enchantment.Enchantment;
 
 public class SpectatorSponsoringRunnable implements Runnable{
 	public static final int pollEveryInTicks = 20 * 30;

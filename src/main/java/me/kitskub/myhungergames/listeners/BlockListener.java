@@ -17,12 +17,12 @@ import org.spout.api.event.block.BlockEvent;
 import org.spout.api.event.cause.PlayerCause;
 import org.spout.api.event.player.PlayerInteractEvent;
 import org.spout.api.event.player.PlayerInteractEvent.Action;
-import org.spout.vanilla.component.substance.material.Sign;
-import org.spout.vanilla.component.substance.material.chest.Chest;
-import org.spout.vanilla.event.block.SignUpdateEvent;
-import org.spout.vanilla.event.cause.PlayerBreakCause;
-import org.spout.vanilla.event.cause.PlayerPlacementCause;
-import org.spout.vanilla.material.VanillaMaterials;
+import org.spout.vanilla.plugin.component.substance.material.Sign;
+import org.spout.vanilla.plugin.component.substance.material.chest.Chest;
+import org.spout.vanilla.plugin.event.block.SignUpdateEvent;
+import org.spout.vanilla.plugin.event.cause.PlayerBreakCause;
+import org.spout.vanilla.plugin.event.cause.PlayerPlacementCause;
+import org.spout.vanilla.plugin.material.VanillaMaterials;
 
 public class BlockListener implements Listener {
 	

@@ -46,16 +46,16 @@ import org.spout.api.material.block.BlockFaces;
 import org.spout.api.scheduler.Task;
 import org.spout.api.scheduler.TaskPriority;
 import org.spout.api.util.config.ConfigurationNode;
-import org.spout.vanilla.component.inventory.PlayerInventory;
-import org.spout.vanilla.component.living.neutral.Human;
-import org.spout.vanilla.component.misc.HungerComponent;
-import org.spout.vanilla.component.substance.Item;
-import org.spout.vanilla.component.substance.material.chest.Chest;
-import org.spout.vanilla.component.world.VanillaSky;
-import org.spout.vanilla.data.GameMode;
-import org.spout.vanilla.event.cause.HealthChangeCause;
-import org.spout.vanilla.event.player.PlayerDeathEvent;
-import org.spout.vanilla.util.explosion.ExplosionModelSpherical;
+import org.spout.vanilla.plugin.component.inventory.PlayerInventory;
+import org.spout.vanilla.plugin.component.living.neutral.Human;
+import org.spout.vanilla.plugin.component.misc.HungerComponent;
+import org.spout.vanilla.plugin.component.substance.Item;
+import org.spout.vanilla.plugin.component.substance.material.chest.Chest;
+import org.spout.vanilla.plugin.component.world.VanillaSky;
+import org.spout.vanilla.plugin.data.GameMode;
+import org.spout.vanilla.plugin.event.cause.HealthChangeCause;
+import org.spout.vanilla.plugin.event.player.PlayerDeathEvent;
+import org.spout.vanilla.plugin.util.explosion.ExplosionModelSpherical;
 
 	
 public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
@@ -1142,39 +1142,39 @@ public class HungerGame implements Comparable<HungerGame>, Runnable, Game {
 
 			});
 			teleportPlayerToSpawn(killed);
-			checkForGameOver(false);
 			int deathCannon = Config.DEATH_CANNON.getInt(setup);
 			int deathMessages = Config.SHOW_DEATH_MESSAGES.getInt(setup);
 			if (deathCannon == 1 || deathCannon == 2) playCannonBoom();
 			if (deathMessages == 1 || deathMessages == 2) {
-				List<String> messages = Lang.getDeathMessages(setup);
-				ChatUtils.broadcast(this, messages.get((new Random()).nextInt(messages.size()))
-					.replace("<killed>", killed.getDisplayName()
-					.replace("<killer>", killerDisplayName)
-					.replace("<game>", name)));
+				broadcastKillMessage(killed.getDisplayName(), killerDisplayName);
 			}
+			checkForGameOver(false);
 		}
 		else {
+			Transform respawn;
 			if (Config.SPAWNPOINT_ON_DEATH.getBoolean(setup)) {
-				Transform respawn = spawnsTaken.get(killed);
-				TeleportListener.allowTeleport(killed);
-				killed.teleport(respawn);
+				respawn = spawnsTaken.get(killed);
 			}
 			else {
-				Transform respawn = randomLocs.get(HungerGames.RANDOM.nextInt(randomLocs.size()));
-				TeleportListener.allowTeleport(killed);
-				killed.teleport(respawn);
+				respawn = randomLocs.get(HungerGames.RANDOM.nextInt(randomLocs.size()));
 			}
+			TeleportListener.allowTeleport(killed);
+			killed.teleport(respawn);
 			if (Config.DEATH_CANNON.getInt(setup) == 1) playCannonBoom();
 			if (Config.SHOW_DEATH_MESSAGES.getInt(setup) == 1) {
-				List<String> deathMessages = Lang.getDeathMessages(setup);
-				ChatUtils.broadcast(this, deathMessages.get((new Random()).nextInt(deathMessages.size()))
-					.replace("<killed>", killed.getDisplayName()
-					.replace("<killer>", killerDisplayName)
-					.replace("<game>", name)));
+				broadcastKillMessage(killed.getDisplayName(), killerDisplayName);
 			}
 			ChatUtils.send(killed, "You have " + killedStat.getLivesLeft() + " lives left.");
 		}
+	}
+
+	private void broadcastKillMessage(String killed, String killer) {
+		List<String> messages = Lang.getDeathMessages(setup);
+		String message = messages.get(new Random().nextInt(messages.size()));
+		message.replace("<killed>", killed);
+		message.replace("<killer>", killer);
+		message.replace("<game>", name);
+		ChatUtils.broadcast(this, message);
 	}
 
 	@Override

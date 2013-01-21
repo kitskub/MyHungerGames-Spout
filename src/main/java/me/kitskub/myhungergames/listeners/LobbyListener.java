@@ -26,9 +26,9 @@ import org.spout.api.material.block.BlockFace;
 import org.spout.api.scheduler.TaskPriority;
 import org.spout.api.util.config.ConfigurationNode;
 import org.spout.api.util.config.yaml.YamlConfiguration;
-import org.spout.vanilla.chat.VanillaStyleHandler;
-import org.spout.vanilla.component.substance.material.Sign;
-import org.spout.vanilla.event.cause.PlayerBreakCause;
+import org.spout.vanilla.plugin.chat.VanillaStyleHandler;
+import org.spout.vanilla.plugin.component.substance.material.Sign;
+import org.spout.vanilla.plugin.event.cause.PlayerBreakCause;
 
 public class LobbyListener implements Listener, Runnable {
 	private static Map<Point, WeakReference<HungerGame>> joinSigns = new HashMap<Point, WeakReference<HungerGame>>();

@@ -11,7 +11,7 @@ import org.spout.api.command.Command;
 import org.spout.api.command.CommandContext;
 import org.spout.api.entity.Player;
 import org.spout.api.inventory.ItemStack;
-import org.spout.vanilla.component.inventory.PlayerInventory;
+import org.spout.vanilla.plugin.component.inventory.PlayerInventory;
 
 public class AddRewardCommand extends PlayerCommand {
 

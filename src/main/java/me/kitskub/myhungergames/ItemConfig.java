@@ -12,7 +12,7 @@ import me.kitskub.myhungergames.utils.ConfigUtils;
 
 import org.spout.api.inventory.ItemStack;
 import org.spout.api.util.config.ConfigurationNode;
-import org.spout.vanilla.material.enchantment.Enchantment;
+import org.spout.vanilla.plugin.material.enchantment.Enchantment;
 
 public class ItemConfig {
 	
